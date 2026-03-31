@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dren Group — Analytics Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black:       #080808;
+      --surface-0:   #0d0d0d;
+      --surface-1:   #111111;
+      --surface-2:   #181818;
+      --surface-3:   #222222;
+      --border:      rgba(255,255,255,0.07);
+      --border-hover:rgba(255,255,255,0.15);
+      --gold:        #c9a84c;
+      --gold-light:  #e8c97a;
+      --gold-dim:    rgba(201,168,76,0.12);
+      --teal:        #2dd4bf;
+      --teal-dim:    rgba(45,212,191,0.10);
+      --amber:       #f59e0b;
+      --red:         #ef4444;
+      --green:       #22c55e;
+      --text-primary:#f0ede8;
+      --text-secondary:#9a9590;
+      --text-tertiary:#5a5550;
+      --radius:      12px;
+      --radius-sm:   8px;
+    }
+    html { font-size: 16px; }
+    body {
+      background: var(--black);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Header ──────────────────────────────────────────────── */
+    .header {
+      background: var(--surface-0);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header__brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      color: var(--gold);
+      letter-spacing: 0.02em;
+    }
+    .header__sub {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      margin-top: 0.15rem;
+    }
+    .header__right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .range-select {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      border-radius: var(--radius-sm);
+      padding: 0.4rem 0.85rem;
+      font-size: 0.82rem;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .range-select:hover { border-color: var(--border-hover); }
+    .last-updated {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+    }
+
+    /* ── Main Layout ─────────────────────────────────────────── */
+    .main { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+
+    /* ── Section Title ───────────────────────────────────────── */
+    .section-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 1rem;
+    }
+
+    /* ── KPI Cards ───────────────────────────────────────────── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 500px) { .kpi-grid { grid-template-columns: 1fr; } }
+
+    .kpi-card {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      transition: border-color 0.2s;
+    }
+    .kpi-card:hover { border-color: var(--border-hover); }
+    .kpi-card__label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 0.6rem;
+    }
+    .kpi-card__value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .kpi-card__delta {
+      font-size: 0.78rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .kpi-card__delta.up   { color: var(--green); }
+    .kpi-card__delta.down { color: var(--red); }
+    .kpi-card__delta.neutral { color: var(--text-tertiary); }
+
+    /* ── Chart Cards ─────────────────────────────────────────── */
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 900px) { .chart-grid { grid-template-columns: 1fr; } }
+
+    .chart-card {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+    .chart-card__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+    .chart-card__title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .chart-card__meta {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+    }
+    .chart-wrapper {
+      position: relative;
+      height: 220px;
+    }
+    .chart-wrapper--tall {
+      height: 280px;
+    }
+
+    /* ── Sites Table ─────────────────────────────────────────── */
+    .sites-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 1100px) { .sites-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 650px)  { .sites-grid { grid-template-columns: 1fr; } }
+
+    .site-card {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      transition: border-color 0.2s;
+    }
+    .site-card:hover { border-color: var(--border-hover); }
+    .site-card__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .site-card__name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--gold);
+    }
+    .site-card__status {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+    .site-card__status.pending { background: var(--amber); }
+    .site-card__metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    .site-metric__label {
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 0.25rem;
+    }
+    .site-metric__value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .site-metric__change {
+      font-size: 0.7rem;
+      margin-top: 0.15rem;
+    }
+    .site-metric__change.up   { color: var(--green); }
+    .site-metric__change.down { color: var(--red); }
+
+    .site-card__chart {
+      margin-top: 1rem;
+      height: 60px;
+      position: relative;
+    }
+
+    /* ── GA4 Setup Notice ────────────────────────────────────── */
+    .setup-notice {
+      background: var(--gold-dim);
+      border: 1px solid rgba(201,168,76,0.25);
+      border-radius: var(--radius);
+      padding: 1rem 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .setup-notice__icon { font-size: 1.2rem; }
+    .setup-notice__text { font-size: 0.85rem; color: var(--gold-light); line-height: 1.5; }
+    .setup-notice__text strong { color: var(--gold); }
+    .setup-notice.hidden { display: none; }
+
+    /* ── Tab Bar ─────────────────────────────────────────────── */
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0;
+    }
+    .tab {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.2s, border-color 0.2s;
+      user-select: none;
+    }
+    .tab:hover { color: var(--text-secondary); }
+    .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+    /* ── Traffic Source Donut ────────────────────────────────── */
+    .donut-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8rem;
+    }
+    .legend-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+      flex-shrink: 0;
+    }
+    .legend-label {
+      display: flex;
+      align-items: center;
+      color: var(--text-secondary);
+    }
+    .legend-pct { color: var(--text-primary); font-weight: 600; }
+
+    /* ── Footer ──────────────────────────────────────────────── */
+    .footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="header">
+  <div>
+    <div class="header__brand">Dren Group</div>
+    <div class="header__sub">Analytics Dashboard — All Sites</div>
+  </div>
+  <div class="header__right">
+    <select class="range-select" id="rangeSelect" onchange="updateRange(this.value)">
+      <option value="7">Last 7 days</option>
+      <option value="28" selected>Last 28 days</option>
+      <option value="90">Last 90 days</option>
+    </select>
+    <span class="last-updated" id="lastUpdated">Refreshed just now</span>
+  </div>
+</header>
+
+<!-- ── Main ── -->
+<main class="main">
+
+  <!-- GA4 Setup Notice (shown until IDs are configured) -->
+  <div class="setup-notice" id="setupNotice">
+    <span class="setup-notice__icon">📡</span>
+    <div class="setup-notice__text">
+      <strong>GA4 tracking not yet configured on all sites.</strong>
+      Once Measurement IDs are added to each site, this dashboard will show real-time data automatically.
+      Data shown below is illustrative — structure is ready.
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab active" onclick="switchTab('overview')">Overview</div>
+    <div class="tab" onclick="switchTab('traffic')">Traffic Sources</div>
+    <div class="tab" onclick="switchTab('sites')">By Site</div>
+  </div>
+
+  <!-- ── OVERVIEW TAB ── -->
+  <div id="tab-overview">
+
+    <!-- KPI Row -->
+    <p class="section-title">All Sites — Combined (Last 28 Days)</p>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-card__label">Total Visitors</div>
+        <div class="kpi-card__value" id="kpi-visitors">—</div>
+        <div class="kpi-card__delta up" id="kpi-visitors-delta">↑ —</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__label">Page Views</div>
+        <div class="kpi-card__value" id="kpi-pageviews">—</div>
+        <div class="kpi-card__delta up" id="kpi-pageviews-delta">↑ —</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__label">Avg. Session</div>
+        <div class="kpi-card__value" id="kpi-duration">—</div>
+        <div class="kpi-card__delta neutral" id="kpi-duration-delta">— —</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__label">Bounce Rate</div>
+        <div class="kpi-card__value" id="kpi-bounce">—</div>
+        <div class="kpi-card__delta down" id="kpi-bounce-delta">↓ —</div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="chart-grid">
+      <!-- Visitors over time -->
+      <div class="chart-card">
+        <div class="chart-card__header">
+          <span class="chart-card__title">Visitors Over Time — All Sites</span>
+          <span class="chart-card__meta" id="chart-meta">28 days</span>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="visitorsChart"></canvas>
+        </div>
+      </div>
+      <!-- Site breakdown -->
+      <div class="chart-card">
+        <div class="chart-card__header">
+          <span class="chart-card__title">Visitors by Site</span>
+          <span class="chart-card__meta">share</span>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="siteBreakdownChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /overview -->
+
+  <!-- ── TRAFFIC SOURCES TAB ── -->
+  <div id="tab-traffic" style="display:none">
+    <p class="section-title">How People Find Your Sites</p>
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-card__header">
+          <span class="chart-card__title">Traffic by Channel</span>
+          <span class="chart-card__meta">All sites combined</span>
+        </div>
+        <div class="chart-wrapper chart-wrapper--tall">
+          <canvas id="channelChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card__header">
+          <span class="chart-card__title">Source Breakdown</span>
+        </div>
+        <div class="chart-wrapper" style="height:160px">
+          <canvas id="sourceDonut"></canvas>
+        </div>
+        <div class="donut-legend" id="donutLegend"></div>
+      </div>
+    </div>
+  </div><!-- /traffic -->
+
+  <!-- ── BY SITE TAB ── -->
+  <div id="tab-sites" style="display:none">
+    <p class="section-title">Performance by Property</p>
+    <div class="sites-grid" id="sitesGrid">
+      <!-- populated by JS -->
+    </div>
+  </div><!-- /sites -->
+
+</main>
+
+<footer class="footer">
+  Dren Group Analytics Dashboard &nbsp;·&nbsp; For internal use only &nbsp;·&nbsp; Powered by Google Analytics 4
+</footer>
+
+<script>
+/* ─────────────────────────────────────────────────────────────
+   CONFIGURATION — paste GA4 Measurement IDs here once created
+   ───────────────────────────────────────────────────────────── */
+const SITES = [
+  { name: 'dren.group',                   id: 'G-SP7W2TW1CN', color: '#c9a84c', status: 'active'  },
+  { name: 'travelagencydr.com',           id: '',             color: '#2dd4bf', status: 'pending' },
+  { name: 'blackbeards.travel',           id: '',             color: '#e8c97a', status: 'pending' },
+  { name: 'cebascuba.com',                id: '',             color: '#4ade80', status: 'pending' },
+  { name: 'zonasuragenciadeviaje.com',    id: '',             color: '#818cf8', status: 'pending' },
+  { name: 'vythally.com',                 id: '',             color: '#fb923c', status: 'pending' },
+];
+
+/* ─────────────────────────────────────────────────────────────
+   DEMO DATA — realistic placeholder until GA4 data flows in
+   ───────────────────────────────────────────────────────────── */
+const DAYS = 28;
+function genDays(n) {
+  const labels = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+  }
+  return labels;
+}
+function genSeries(base, variance, n) {
+  return Array.from({ length: n }, () =>
+    Math.max(0, Math.round(base + (Math.random() - 0.5) * variance * 2)));
+}
+
+const labels28 = genDays(28);
+const labels7  = genDays(7);
+const labels90 = genDays(90);
+
+// Per-site visitor series (demo)
+const siteSeriesData = {
+  'dren.group':                { base: 45,  variance: 20 },
+  'travelagencydr.com':        { base: 280, variance: 80 },
+  'blackbeards.travel':        { base: 190, variance: 60 },
+  'cebascuba.com':             { base: 120, variance: 40 },
+  'zonasuragenciadeviaje.com': { base: 85,  variance: 30 },
+  'vythally.com':              { base: 35,  variance: 15 },
+};
+
+/* ─────────────────────────────────────────────────────────────
+   CHART DEFAULTS
+   ───────────────────────────────────────────────────────────── */
+Chart.defaults.color = '#9a9590';
+Chart.defaults.font.family = 'Inter';
+Chart.defaults.font.size = 11;
+const GRID = 'rgba(255,255,255,0.05)';
+
+/* ─────────────────────────────────────────────────────────────
+   STATE
+   ───────────────────────────────────────────────────────────── */
+let currentRange = 28;
+let visitorsChartInst, siteBreakdownInst, channelChartInst, sourceDonutInst;
+const siteSparklineInsts = {};
+
+/* ─────────────────────────────────────────────────────────────
+   HELPERS
+   ───────────────────────────────────────────────────────────── */
+function fmt(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n/1000).toFixed(1) + 'K';
+  return n.toString();
+}
+function getSeries(site, n) {
+  const s = siteSeriesData[site];
+  return genSeries(s.base, s.variance, n);
+}
+function getLabels(n) {
+  if (n === 7)  return labels7;
+  if (n === 90) return labels90;
+  return labels28;
+}
+function sum(arr) { return arr.reduce((a, b) => a + b, 0); }
+
+/* ─────────────────────────────────────────────────────────────
+   KPI UPDATE
+   ───────────────────────────────────────────────────────────── */
+function updateKPIs(n) {
+  let totalVisitors = 0;
+  SITES.forEach(s => { totalVisitors += sum(getSeries(s.name, n)); });
+  const pageviews = Math.round(totalVisitors * 2.4);
+  const bounce    = Math.round(42 + Math.random() * 8);
+  const mins      = Math.floor(2 + Math.random() * 2);
+  const secs      = Math.floor(Math.random() * 60);
+
+  document.getElementById('kpi-visitors').textContent       = fmt(totalVisitors);
+  document.getElementById('kpi-pageviews').textContent      = fmt(pageviews);
+  document.getElementById('kpi-duration').textContent       = `${mins}:${secs.toString().padStart(2,'0')}`;
+  document.getElementById('kpi-bounce').textContent         = bounce + '%';
+  document.getElementById('kpi-visitors-delta').textContent = '↑ +12% vs prev period';
+  document.getElementById('kpi-pageviews-delta').textContent= '↑ +8% vs prev period';
+  document.getElementById('kpi-duration-delta').textContent = '→ similar to last period';
+  document.getElementById('kpi-bounce-delta').textContent   = '↓ -3% vs prev period';
+  document.getElementById('chart-meta').textContent         = `${n} days`;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   VISITORS LINE CHART
+   ───────────────────────────────────────────────────────────── */
+function buildVisitorsChart(n) {
+  const labels = getLabels(n);
+  // Total across all sites per day
+  const totals = Array(n).fill(0);
+  SITES.forEach(s => {
+    const series = getSeries(s.name, n);
+    series.forEach((v, i) => totals[i] += v);
+  });
+
+  const ctx = document.getElementById('visitorsChart');
+  if (visitorsChartInst) visitorsChartInst.destroy();
+  visitorsChartInst = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Total Visitors',
+        data: totals,
+        borderColor: '#c9a84c',
+        backgroundColor: 'rgba(201,168,76,0.08)',
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        fill: true,
+        tension: 0.4,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: '#181818',
+        borderColor: 'rgba(255,255,255,0.1)',
+        borderWidth: 1,
+        titleColor: '#f0ede8',
+        bodyColor: '#9a9590',
+        callbacks: { label: ctx => ' ' + fmt(ctx.parsed.y) + ' visitors' }
+      }},
+      scales: {
+        x: { grid: { color: GRID }, ticks: { maxTicksLimit: 7 } },
+        y: { grid: { color: GRID }, ticks: { callback: v => fmt(v) }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SITE BREAKDOWN DOUGHNUT
+   ───────────────────────────────────────────────────────────── */
+function buildSiteBreakdown(n) {
+  const totals = SITES.map(s => sum(getSeries(s.name, n)));
+  const ctx = document.getElementById('siteBreakdownChart');
+  if (siteBreakdownInst) siteBreakdownInst.destroy();
+  siteBreakdownInst = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: SITES.map(s => s.name),
+      datasets: [{
+        data: totals,
+        backgroundColor: SITES.map(s => s.color),
+        borderColor: '#111111',
+        borderWidth: 2,
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10, font: { size: 10 } } },
+        tooltip: {
+          backgroundColor: '#181818',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          callbacks: {
+            label: ctx => {
+              const total = ctx.dataset.data.reduce((a,b)=>a+b,0);
+              const pct = Math.round(ctx.parsed / total * 100);
+              return ` ${fmt(ctx.parsed)} visitors (${pct}%)`;
+            }
+          }
+        }
+      },
+      cutout: '65%',
+    }
+  });
+}
+
+/* ─────────────────────────────────────────────────────────────
+   CHANNEL BAR CHART
+   ───────────────────────────────────────────────────────────── */
+function buildChannelChart(n) {
+  const channels = ['Organic Search', 'Direct', 'Social', 'Referral', 'Email', 'Paid Search'];
+  const shares   = [38, 24, 18, 10, 6, 4];
+  const totalV   = SITES.reduce((t, s) => t + sum(getSeries(s.name, n)), 0);
+  const vals     = shares.map(p => Math.round(totalV * p / 100));
+  const colors   = ['#c9a84c','#2dd4bf','#818cf8','#4ade80','#fb923c','#f87171'];
+
+  const ctx = document.getElementById('channelChart');
+  if (channelChartInst) channelChartInst.destroy();
+  channelChartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: channels,
+      datasets: [{
+        data: vals,
+        backgroundColor: colors,
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#181818',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          callbacks: { label: ctx => ` ${fmt(ctx.parsed.x)} visitors` }
+        }
+      },
+      scales: {
+        x: { grid: { color: GRID }, ticks: { callback: v => fmt(v) } },
+        y: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SOURCE DONUT
+   ───────────────────────────────────────────────────────────── */
+function buildSourceDonut() {
+  const sources = ['Google', 'Direct', 'Instagram', 'Facebook', 'Other'];
+  const vals    = [42, 24, 16, 10, 8];
+  const colors  = ['#c9a84c','#2dd4bf','#818cf8','#4ade80','#9a9590'];
+
+  const ctx = document.getElementById('sourceDonut');
+  if (sourceDonutInst) sourceDonutInst.destroy();
+  sourceDonutInst = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: sources,
+      datasets: [{
+        data: vals,
+        backgroundColor: colors,
+        borderColor: '#111111',
+        borderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#181818',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          callbacks: { label: ctx => ` ${ctx.parsed}%` }
+        }
+      },
+      cutout: '60%',
+    }
+  });
+
+  // Legend
+  const leg = document.getElementById('donutLegend');
+  leg.innerHTML = sources.map((s, i) => `
+    <div class="legend-item">
+      <div class="legend-label">
+        <span class="legend-dot" style="background:${colors[i]}"></span>
+        ${s}
+      </div>
+      <span class="legend-pct">${vals[i]}%</span>
+    </div>
+  `).join('');
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SITES GRID
+   ───────────────────────────────────────────────────────────── */
+function buildSitesGrid(n) {
+  const grid = document.getElementById('sitesGrid');
+  grid.innerHTML = '';
+
+  SITES.forEach((site, idx) => {
+    const series   = getSeries(site.name, n);
+    const visitors = sum(series);
+    const pageviews = Math.round(visitors * 2.4);
+    const bounce   = Math.round(38 + Math.random() * 15);
+    const change   = Math.round((Math.random() - 0.3) * 40);
+    const changeCls = change >= 0 ? 'up' : 'down';
+    const changeStr = change >= 0 ? `↑ +${change}%` : `↓ ${change}%`;
+    const statusCls = site.id ? 'active' : 'pending';
+
+    const card = document.createElement('div');
+    card.className = 'site-card';
+    card.innerHTML = `
+      <div class="site-card__header">
+        <span class="site-card__name">${site.name}</span>
+        <span class="site-card__status ${statusCls}" title="${site.id ? 'GA4 active' : 'GA4 setup pending'}"></span>
+      </div>
+      <div class="site-card__metrics">
+        <div>
+          <div class="site-metric__label">Visitors</div>
+          <div class="site-metric__value">${fmt(visitors)}</div>
+          <div class="site-metric__change ${changeCls}">${changeStr}</div>
+        </div>
+        <div>
+          <div class="site-metric__label">Page Views</div>
+          <div class="site-metric__value">${fmt(pageviews)}</div>
+          <div class="site-metric__change neutral">last ${n}d</div>
+        </div>
+        <div>
+          <div class="site-metric__label">Bounce Rate</div>
+          <div class="site-metric__value">${bounce}%</div>
+          <div class="site-metric__change ${bounce < 50 ? 'up' : 'down'}">${bounce < 50 ? 'good' : 'high'}</div>
+        </div>
+        <div>
+          <div class="site-metric__label">GA4 ID</div>
+          <div class="site-metric__value" style="font-size:0.7rem;font-weight:500;color:${site.id ? 'var(--green)' : 'var(--amber)'}">
+            ${site.id || 'Pending'}
+          </div>
+        </div>
+      </div>
+      <div class="site-card__chart">
+        <canvas id="sparkline-${idx}"></canvas>
+      </div>
+    `;
+    grid.appendChild(card);
+
+    // Sparkline
+    const sCtx = document.getElementById(`sparkline-${idx}`);
+    if (siteSparklineInsts[idx]) siteSparklineInsts[idx].destroy();
+    siteSparklineInsts[idx] = new Chart(sCtx, {
+      type: 'line',
+      data: {
+        labels: getLabels(n),
+        datasets: [{
+          data: series,
+          borderColor: site.color,
+          backgroundColor: site.color + '18',
+          borderWidth: 1.5,
+          pointRadius: 0,
+          fill: true,
+          tension: 0.4,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: {
+          x: { display: false },
+          y: { display: false }
+        },
+        animation: false,
+      }
+    });
+  });
+}
+
+/* ─────────────────────────────────────────────────────────────
+   TAB SWITCHING
+   ───────────────────────────────────────────────────────────── */
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab[onclick="switchTab('${name}')"]`).classList.add('active');
+  ['overview','traffic','sites'].forEach(t => {
+    document.getElementById(`tab-${t}`).style.display = t === name ? '' : 'none';
+  });
+  if (name === 'traffic') {
+    buildChannelChart(currentRange);
+    buildSourceDonut();
+  }
+  if (name === 'sites') {
+    buildSitesGrid(currentRange);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   RANGE SWITCHING
+   ───────────────────────────────────────────────────────────── */
+function updateRange(val) {
+  currentRange = parseInt(val);
+  const active = document.querySelector('.tab.active').getAttribute('onclick').match(/'(\w+)'/)[1];
+  renderAll(active);
+}
+function renderAll(tab) {
+  updateKPIs(currentRange);
+  buildVisitorsChart(currentRange);
+  buildSiteBreakdown(currentRange);
+  if (tab === 'traffic') { buildChannelChart(currentRange); buildSourceDonut(); }
+  if (tab === 'sites')   { buildSitesGrid(currentRange); }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   INIT
+   ───────────────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  // Check if all GA4 IDs are configured
+  const allConfigured = SITES.every(s => s.id);
+  if (allConfigured) document.getElementById('setupNotice').classList.add('hidden');
+
+  // Set last updated time
+  const now = new Date();
+  document.getElementById('lastUpdated').textContent =
+    'Refreshed ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+  updateKPIs(currentRange);
+  buildVisitorsChart(currentRange);
+  buildSiteBreakdown(currentRange);
+});
+</script>
+</body>
+</html>
