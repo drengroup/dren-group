@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Syntax — Dren Group Analytics</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black:        #080808;
+      --surface-0:    #0d0d0d;
+      --surface-1:    #111111;
+      --surface-2:    #181818;
+      --surface-3:    #222222;
+      --border:       rgba(255,255,255,0.07);
+      --border-hover: rgba(255,255,255,0.15);
+      --gold:         #c9a84c;
+      --gold-light:   #e8c97a;
+      --gold-dim:     rgba(201,168,76,0.12);
+      --teal:         #2dd4bf;
+      --green:        #22c55e;
+      --red:          #ef4444;
+      --amber:        #f59e0b;
+      --text-primary: #f0ede8;
+      --text-secondary:#9a9590;
+      --text-tertiary: #5a5550;
+      --radius:       12px;
+      --radius-sm:    8px;
+    }
+    html { font-size: 16px; }
+    body {
+      background: var(--black);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Login Screen ────────────────────────────────────────── */
+    #loginScreen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--black);
+      position: relative;
+      overflow: hidden;
+    }
+    #loginScreen::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .login-card {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 380px;
+      position: relative;
+      z-index: 1;
+    }
+    .login-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 0.35rem;
+    }
+    .login-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      text-align: center;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+    }
+    .login-field {
+      margin-bottom: 1rem;
+    }
+    .login-label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 0.4rem;
+    }
+    .login-input {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.7rem 1rem;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .login-input:focus { border-color: var(--gold); }
+    .login-input::placeholder { color: var(--text-tertiary); }
+    .login-btn {
+      width: 100%;
+      background: var(--gold);
+      color: #080808;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .login-btn:hover { background: var(--gold-light); }
+    .login-btn:active { transform: scale(0.98); }
+    .login-error {
+      color: var(--red);
+      font-size: 0.78rem;
+      text-align: center;
+      margin-top: 0.75rem;
+      min-height: 1rem;
+    }
+    .login-footer {
+      text-align: center;
+      font-size: 0.68rem;
+      color: var(--text-tertiary);
+      margin-top: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── Dashboard ───────────────────────────────────────────── */
+    #dashboardScreen { display: none; }
+
+    .topbar {
+      background: var(--surface-0);
+      border-bottom: 1px solid var(--border);
+      padding: 0.85rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar__left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .topbar__logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--gold);
+    }
+    .topbar__tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      background: var(--gold-dim);
+      color: var(--gold);
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 4px;
+      padding: 0.2rem 0.5rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .topbar__right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .topbar__user {
+      font-size: 0.78rem;
+      color: var(--text-tertiary);
+    }
+    .logout-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      border-radius: var(--radius-sm);
+      padding: 0.35rem 0.85rem;
+      font-size: 0.78rem;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .logout-btn:hover { border-color: var(--border-hover); color: var(--text-primary); }
+
+    /* ── Main Layout ─────────────────────────────────────────── */
+    .main { display: flex; min-height: calc(100vh - 53px); }
+
+    /* ── Sidebar ─────────────────────────────────────────────── */
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--surface-0);
+      border-right: 1px solid var(--border);
+      padding: 1.5rem 0;
+      position: sticky;
+      top: 53px;
+      height: calc(100vh - 53px);
+      overflow-y: auto;
+    }
+    .sidebar__section {
+      padding: 0 1rem 1rem;
+    }
+    .sidebar__label {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      padding: 0 0.5rem;
+      margin-bottom: 0.4rem;
+    }
+    .sidebar__item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.55rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      user-select: none;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+    }
+    .sidebar__item:hover { background: var(--surface-2); color: var(--text-primary); }
+    .sidebar__item.active { background: var(--gold-dim); color: var(--gold); }
+    .sidebar__dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── Content ─────────────────────────────────────────────── */
+    .content {
+      flex: 1;
+      padding: 2rem;
+      overflow: auto;
+    }
+    .content__header {
+      margin-bottom: 1.5rem;
+    }
+    .content__title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+    }
+    .content__meta {
+      font-size: 0.78rem;
+      color: var(--text-tertiary);
+    }
+
+    /* ── Looker Studio embed frame ───────────────────────────── */
+    .embed-container {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .embed-container iframe {
+      width: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* ── Setup card (shown when embed URL not yet configured) ── */
+    .setup-card {
+      background: var(--surface-1);
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .setup-card__icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .setup-card__title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+    }
+    .setup-card__desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 500px;
+      margin: 0 auto 1.5rem;
+    }
+    .setup-steps {
+      text-align: left;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .setup-step {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      align-items: flex-start;
+    }
+    .setup-step__num {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--gold-dim);
+      border: 1px solid rgba(201,168,76,0.3);
+      color: var(--gold);
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+    .setup-step__text {
+      font-size: 0.83rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .setup-step__text strong { color: var(--text-primary); }
+    .setup-link {
+      display: inline-block;
+      margin-top: 1.5rem;
+      background: var(--gold);
+      color: #080808;
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 1.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .setup-link:hover { background: var(--gold-light); }
+
+    /* ── Quick stats row ─────────────────────────────────────── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 900px) { .stats-row { grid-template-columns: repeat(2,1fr); } }
+    .stat-card {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+    }
+    .stat-card__label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 0.5rem;
+    }
+    .stat-card__value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .stat-card__sub {
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+      margin-top: 0.25rem;
+    }
+
+    /* ── Tabs ────────────────────────────────────────────────── */
+    .tab-bar {
+      display: flex;
+      gap: 0.2rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab {
+      padding: 0.55rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+    .tab:hover { color: var(--text-secondary); }
+    .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+    /* ── Hidden ──────────────────────────────────────────────── */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════════════════════════ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">Dren Group</div>
+    <div class="login-sub">syntax / analytics</div>
+
+    <div class="login-field">
+      <label class="login-label" for="emailInput">Email</label>
+      <input class="login-input" type="email" id="emailInput"
+             placeholder="analytics@dren.group" autocomplete="email">
+    </div>
+    <div class="login-field">
+      <label class="login-label" for="passInput">Password</label>
+      <input class="login-input" type="password" id="passInput"
+             placeholder="••••••••••" autocomplete="current-password">
+    </div>
+    <button class="login-btn" onclick="attemptLogin()">Sign In</button>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-footer">dren.group / syntax — internal only</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     DASHBOARD SCREEN
+══════════════════════════════════════════════════════════ -->
+<div id="dashboardScreen">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="topbar__left">
+      <span class="topbar__logo">Dren Group</span>
+      <span class="topbar__tag">Syntax</span>
+    </div>
+    <div class="topbar__right">
+      <span class="topbar__user" id="topbarUser">analytics@dren.group</span>
+      <button class="logout-btn" onclick="logout()">Sign out</button>
+    </div>
+  </header>
+
+  <div class="main">
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="sidebar__section">
+        <div class="sidebar__label">Overview</div>
+        <button class="sidebar__item active" onclick="showView('all', this)">
+          <span class="sidebar__dot" style="background:#c9a84c"></span>All Sites
+        </button>
+      </div>
+      <div class="sidebar__section">
+        <div class="sidebar__label">Properties</div>
+        <button class="sidebar__item" onclick="showView('tadr', this)">
+          <span class="sidebar__dot" style="background:#2dd4bf"></span>travelagencydr.com
+        </button>
+        <button class="sidebar__item" onclick="showView('bb', this)">
+          <span class="sidebar__dot" style="background:#e8c97a"></span>blackbeards.travel
+        </button>
+        <button class="sidebar__item" onclick="showView('ceba', this)">
+          <span class="sidebar__dot" style="background:#4ade80"></span>cebascuba.com
+        </button>
+        <button class="sidebar__item" onclick="showView('zona', this)">
+          <span class="sidebar__dot" style="background:#818cf8"></span>zonasuragenciadeviaje
+        </button>
+        <button class="sidebar__item" onclick="showView('vyth', this)">
+          <span class="sidebar__dot" style="background:#fb923c"></span>vythally.com
+        </button>
+        <button class="sidebar__item" onclick="showView('dren', this)">
+          <span class="sidebar__dot" style="background:#c9a84c"></span>dren.group
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="content" id="mainContent">
+      <!-- populated by showView() -->
+    </main>
+
+  </div>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────────────────────
+   AUTH — credentials stored as SHA-256 hash (never plaintext)
+   To update password: run SHA256("analytics@dren.group:NEWPASSWORD")
+   and replace HASH below.
+   ───────────────────────────────────────────────────────────── */
+const AUTH = {
+  email: 'analytics@dren.group',
+  hash: '0eb88a2c1b157b2ae1fc443c0c02f08b657a2e4c75a86c3d8fed01db5a38ea70',
+};
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function attemptLogin() {
+  const email = document.getElementById('emailInput').value.trim().toLowerCase();
+  const pass  = document.getElementById('passInput').value;
+  const err   = document.getElementById('loginError');
+
+  if (!email || !pass) { err.textContent = 'Enter email and password.'; return; }
+
+  const hash = await sha256(email + ':' + pass);
+
+  if (email === AUTH.email && hash === AUTH.hash) {
+    sessionStorage.setItem('syntax_auth', '1');
+    sessionStorage.setItem('syntax_user', email);
+    showDashboard();
+  } else {
+    err.textContent = 'Incorrect email or password.';
+    document.getElementById('passInput').value = '';
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('syntax_auth');
+  sessionStorage.removeItem('syntax_user');
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('dashboardScreen').style.display = 'none';
+  document.getElementById('passInput').value = '';
+  document.getElementById('loginError').textContent = '';
+}
+
+function showDashboard() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboardScreen').style.display = 'block';
+  document.getElementById('topbarUser').textContent = sessionStorage.getItem('syntax_user') || AUTH.email;
+  showView('all', document.querySelector('.sidebar__item.active'));
+}
+
+// Allow Enter key on password field
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('passInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') attemptLogin();
+  });
+  document.getElementById('emailInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('passInput').focus();
+  });
+  // Check if already logged in this session
+  if (sessionStorage.getItem('syntax_auth') === '1') showDashboard();
+});
+
+/* ─────────────────────────────────────────────────────────────
+   LOOKER STUDIO EMBED URLs
+   Paste your Looker Studio report embed URLs here once created.
+   Instructions: looker.studio → Create → Report → Share → Embed
+   ───────────────────────────────────────────────────────────── */
+const EMBEDS = {
+  all:  '', // All-sites overview report
+  tadr: '', // travelagencydr.com report
+  bb:   '', // blackbeards.travel report
+  ceba: '', // cebascuba.com report
+  zona: '', // zonasuragenciadeviaje.com report
+  vyth: '', // vythally.com report
+  dren: '', // dren.group report
+};
+
+const GA4_IDS = {
+  all:  'Multiple',
+  tadr: 'G-RB60X9EB2P',
+  bb:   'G-NBK1L3YGJS',
+  ceba: 'G-6G80WFWRC6',
+  zona: 'G-NYNQYWTNLE',
+  vyth: 'G-1N0H8QGXTZ',
+  dren: 'G-SP7W2TW1CN',
+};
+
+const VIEW_META = {
+  all:  { title: 'All Sites Overview',          domain: 'All 7 properties combined'           },
+  tadr: { title: 'Travel Agency DR',            domain: 'travelagencydr.com'                  },
+  bb:   { title: 'BlackBeards Travel',          domain: 'blackbeards.travel'                  },
+  ceba: { title: 'CEBA Scuba',                  domain: 'cebascuba.com'                       },
+  zona: { title: 'Zona Sur Agencia de Viaje',   domain: 'zonasuragenciadeviaje.com'           },
+  vyth: { title: 'Vythally',                    domain: 'vythally.com'                        },
+  dren: { title: 'Dren Group',                  domain: 'dren.group'                          },
+};
+
+/* ─────────────────────────────────────────────────────────────
+   LOOKER STUDIO SETUP INSTRUCTIONS (shown until URL is set)
+   ───────────────────────────────────────────────────────────── */
+const SETUP_STEPS = [
+  { n:1, text: 'Go to <strong><a href="https://lookerstudio.google.com" target="_blank" style="color:var(--gold)">lookerstudio.google.com</a></strong> — sign in as <strong>analytics@dren.group</strong>' },
+  { n:2, text: 'Click <strong>Create → Report</strong>. Add data source: choose <strong>Google Analytics</strong> → select the property for this site.' },
+  { n:3, text: 'Build the report: drag in Visitors, Sessions, Traffic Source, Top Pages, and Events charts. Style as needed.' },
+  { n:4, text: 'Click <strong>Share → Embed report</strong>. Copy the embed URL (starts with <code style="color:var(--teal);font-size:0.78rem">https://lookerstudio.google.com/embed/reporting/...</code>)' },
+  { n:5, text: 'Give the embed URL to Claude and it will be added to this dashboard instantly.' },
+];
+
+function showView(key, btn) {
+  // Update sidebar active state
+  document.querySelectorAll('.sidebar__item').forEach(el => el.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  const meta   = VIEW_META[key];
+  const embedUrl = EMBEDS[key];
+  const ga4id  = GA4_IDS[key];
+  const content = document.getElementById('mainContent');
+
+  const embedSection = embedUrl
+    ? `<div class="embed-container">
+         <iframe src="${embedUrl}"
+                 height="800"
+                 allowfullscreen
+                 sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
+         </iframe>
+       </div>`
+    : `<div class="setup-card">
+         <div class="setup-card__icon">📊</div>
+         <div class="setup-card__title">Connect Looker Studio</div>
+         <div class="setup-card__desc">
+           Looker Studio is Google's free analytics reporting tool. It connects directly to your GA4 data
+           and renders live charts — visitors, traffic sources, top pages, conversions, and more.
+           Once you create a report and paste the embed URL, it appears here automatically.
+         </div>
+         <div class="setup-steps">
+           ${SETUP_STEPS.map(s => `
+             <div class="setup-step">
+               <div class="setup-step__num">${s.n}</div>
+               <div class="setup-step__text">${s.text}</div>
+             </div>`).join('')}
+         </div>
+         <a class="setup-link" href="https://lookerstudio.google.com" target="_blank">Open Looker Studio →</a>
+       </div>`;
+
+  content.innerHTML = `
+    <div class="content__header">
+      <div class="content__title">${meta.title}</div>
+      <div class="content__meta">${meta.domain} &nbsp;·&nbsp; GA4: <span style="color:var(--teal);font-family:'JetBrains Mono',monospace;font-size:0.78rem">${ga4id}</span></div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-card__label">Status</div>
+        <div class="stat-card__value" style="font-size:1.1rem;color:var(--green)">● Tracking</div>
+        <div class="stat-card__sub">GA4 active on site</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__label">Looker Studio</div>
+        <div class="stat-card__value" style="font-size:1.1rem;color:${embedUrl ? 'var(--green)' : 'var(--amber)'}">
+          ${embedUrl ? '● Connected' : '● Setup needed'}
+        </div>
+        <div class="stat-card__sub">${embedUrl ? 'Report embedded' : 'Paste embed URL to activate'}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__label">Data latency</div>
+        <div class="stat-card__value" style="font-size:1.1rem">24–48h</div>
+        <div class="stat-card__sub">GA4 standard delay</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__label">Measurement ID</div>
+        <div class="stat-card__value" style="font-size:0.85rem;font-family:'JetBrains Mono',monospace;color:var(--teal)">${ga4id}</div>
+        <div class="stat-card__sub">Deployed on site</div>
+      </div>
+    </div>
+
+    ${embedSection}
+  `;
+}
+</script>
+</body>
+</html>
