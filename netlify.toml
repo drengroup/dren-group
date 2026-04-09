@@ -27,6 +27,18 @@
     Cache-Control = "public, max-age=31536000, immutable"
 
 [[redirects]]
+  from = "/it"
+  to = "https://it.dren.group"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/it/*"
+  to = "https://it.dren.group/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
   from = "https://www.dren.group/*"
   to = "https://dren.group/:splat"
   status = 301
