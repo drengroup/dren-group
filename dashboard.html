@@ -320,9 +320,154 @@
       color: var(--text-tertiary);
       border-top: 1px solid var(--border);
     }
+
+    /* ── Login Screen ────────────────────────────────────────── */
+    #loginScreen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--black);
+      position: relative;
+      overflow: hidden;
+    }
+    #loginScreen::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .login-card {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 380px;
+      position: relative;
+      z-index: 1;
+    }
+    .login-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 0.35rem;
+    }
+    .login-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      text-align: center;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+    }
+    .login-field {
+      margin-bottom: 1rem;
+    }
+    .login-label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 0.4rem;
+    }
+    .login-input {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.7rem 1rem;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .login-input:focus { border-color: var(--gold); }
+    .login-input::placeholder { color: var(--text-tertiary); }
+    .login-btn {
+      width: 100%;
+      background: var(--gold);
+      color: #080808;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .login-btn:hover { background: var(--gold-light); }
+    .login-btn:active { transform: scale(0.98); }
+    .login-error {
+      color: var(--red);
+      font-size: 0.78rem;
+      text-align: center;
+      margin-top: 0.75rem;
+      min-height: 1rem;
+    }
+    .login-footer {
+      text-align: center;
+      font-size: 0.68rem;
+      color: var(--text-tertiary);
+      margin-top: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── Dashboard (hidden until auth) ───────────────────────── */
+    #dashboardScreen { display: none; }
+
+    .logout-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      border-radius: var(--radius-sm);
+      padding: 0.35rem 0.85rem;
+      font-size: 0.78rem;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .logout-btn:hover { border-color: var(--border-hover); color: var(--text-primary); }
   </style>
 </head>
 <body>
+
+<!-- ── Login Screen ── -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">Dren Group</div>
+    <div class="login-sub">analytics / dashboard</div>
+
+    <div class="login-field">
+      <label class="login-label" for="emailInput">Email</label>
+      <input class="login-input" type="email" id="emailInput"
+             placeholder="analytics@dren.group" autocomplete="email">
+    </div>
+    <div class="login-field">
+      <label class="login-label" for="passInput">Password</label>
+      <input class="login-input" type="password" id="passInput"
+             placeholder="••••••••••" autocomplete="current-password">
+    </div>
+    <button class="login-btn" onclick="attemptLogin()">Sign In</button>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-footer">dren.group / dashboard — internal only</div>
+  </div>
+</div>
+
+<!-- ── Dashboard (shown only after auth) ── -->
+<div id="dashboardScreen" style="display:none">
 
 <!-- ── Header ── -->
 <header class="header">
@@ -337,6 +482,7 @@
       <option value="90">Last 90 days</option>
     </select>
     <span class="last-updated" id="lastUpdated">Refreshed just now</span>
+    <button class="logout-btn" onclick="logout()">Sign out</button>
   </div>
 </header>
 
@@ -452,6 +598,8 @@
 <footer class="footer">
   Dren Group Analytics Dashboard &nbsp;·&nbsp; For internal use only &nbsp;·&nbsp; Powered by Google Analytics 4
 </footer>
+
+</div><!-- /dashboardScreen -->
 
 <script>
 /* ─────────────────────────────────────────────────────────────
@@ -859,7 +1007,56 @@ function renderAll(tab) {
 /* ─────────────────────────────────────────────────────────────
    INIT
    ───────────────────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', () => {
+/* ─────────────────────────────────────────────────────────────
+   AUTH — credentials stored as SHA-256 hash (never plaintext)
+   To update password: run SHA256("analytics@dren.group:NEWPASSWORD")
+   and replace HASH below.
+   ───────────────────────────────────────────────────────────── */
+const AUTH = {
+  email: 'analytics@dren.group',
+  hash: '0eb88a2c1b157b2ae1fc443c0c02f08b657a2e4c75a86c3d8fed01db5a38ea70',
+};
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function attemptLogin() {
+  const email = document.getElementById('emailInput').value.trim().toLowerCase();
+  const pass  = document.getElementById('passInput').value;
+  const err   = document.getElementById('loginError');
+
+  if (!email || !pass) { err.textContent = 'Enter email and password.'; return; }
+
+  const hash = await sha256(email + ':' + pass);
+
+  if (email === AUTH.email && hash === AUTH.hash) {
+    sessionStorage.setItem('dg_dash_auth', '1');
+    sessionStorage.setItem('dg_dash_user', email);
+    showDashboard();
+  } else {
+    err.textContent = 'Incorrect email or password.';
+    document.getElementById('passInput').value = '';
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('dg_dash_auth');
+  sessionStorage.removeItem('dg_dash_user');
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('dashboardScreen').style.display = 'none';
+  document.getElementById('passInput').value = '';
+  document.getElementById('loginError').textContent = '';
+}
+
+function showDashboard() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboardScreen').style.display = 'block';
+  initDashboard();
+}
+
+function initDashboard() {
   // Check if all GA4 IDs are configured
   const allConfigured = SITES.every(s => s.id);
   if (allConfigured) document.getElementById('setupNotice').classList.add('hidden');
@@ -872,6 +1069,20 @@ document.addEventListener('DOMContentLoaded', () => {
   updateKPIs(currentRange);
   buildVisitorsChart(currentRange);
   buildSiteBreakdown(currentRange);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Allow Enter key on password field
+  document.getElementById('passInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') attemptLogin();
+  });
+  document.getElementById('emailInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('passInput').focus();
+  });
+  // Check if already logged in this session
+  if (sessionStorage.getItem('dg_dash_auth') === '1') {
+    showDashboard();
+  }
 });
 </script>
 </body>
