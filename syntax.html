@@ -411,6 +411,24 @@
     /* ── Hidden ──────────────────────────────────────────────── */
     .hidden { display: none !important; }
   </style>
+<!-- DG-SENTRY-INSTALLED-V1 -->
+<script src="https://browser.sentry-cdn.com/8.45.1/bundle.tracing.min.js" crossorigin="anonymous"></script>
+<script>
+  if (typeof Sentry !== 'undefined') {
+    Sentry.init({
+      dsn: "https://1bb48d610fc0a092b2de760602a98400@o4511117084196864.ingest.us.sentry.io/4511462484148224",
+      release: "dren-group@" + (document.documentElement.getAttribute('data-build') || 'live'),
+      environment: "production",
+      tracesSampleRate: 0.1,
+      sendDefaultPii: false,
+      beforeSend: function(event) {
+        if (event.request && event.request.cookies) delete event.request.cookies;
+        return event;
+      }
+    });
+  }
+</script>
+<!-- /DG-SENTRY-INSTALLED-V1 -->
 </head>
 <body>
 
