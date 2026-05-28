@@ -1,0 +1,41 @@
+# Dependabot config — DG portfolio standard
+# Pushed 2026-05-28 by Dren Group Cowork ("the mother")
+# Goals:
+#   - Group GitHub Actions bumps into ONE weekly PR (was: 5 separate PRs/week)
+#   - Group npm patch + minor bumps into ONE weekly PR
+#   - Ignore MAJOR version bumps entirely — they're routinely breaking and need manual review
+#   - Skip ecosystems that don't apply to a given repo (Dependabot just no-ops)
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule: { interval: "weekly", day: "monday", time: "09:00", timezone: "America/Santo_Domingo" }
+    open-pull-requests-limit: 3
+    groups:
+      gh-actions-all:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    commit-message: { prefix: "[deps]" }
+    labels: ["dependencies", "github-actions"]
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule: { interval: "weekly", day: "monday", time: "09:30", timezone: "America/Santo_Domingo" }
+    open-pull-requests-limit: 5
+    groups:
+      npm-minor-patch:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+      npm-security:
+        applies-to: security-updates
+        patterns: ["*"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    commit-message: { prefix: "[deps]", prefix-development: "[deps-dev]" }
+    labels: ["dependencies", "npm"]
