@@ -98,7 +98,7 @@
 
     const names = [
       'TADR — travelagencydr.com',
-      'Kubera — kubera.dren.group',
+      'Cuadrato — cuadrato.dren.group',
       'Dren IT — it.dren.group',
       'JurisRD — jurisrd.dren.group',
       'CEBA Scuba — cebascuba.com',
