@@ -558,13 +558,13 @@ img, svg { display: block; max-width: 100%; }
 .ui--tadr { background: #0a1614; }
 .ui--tadr .ui__nav span.active { background: rgba(45,212,191,0.12); color: var(--teal); }
 
-/* ---- Kubera styling ---- */
-.ui--kubera { background: #0d130b; }
-.ui--kubera .ui__sidebar { background: rgba(74,222,128,0.04); }
-.ui--kubera .ui__nav span.active { background: rgba(74,222,128,0.12); color: var(--lime); }
-.ui--kubera .bigfig__num { color: var(--lime); }
-.ui--kubera .ui__rows .row i { background: var(--lime); }
-.ui__rows--kubera .row b { color: var(--lime); }
+/* ---- Cuadrato styling ---- */
+.ui--cuadrato { background: #0d130b; }
+.ui--cuadrato .ui__sidebar { background: rgba(74,222,128,0.04); }
+.ui--cuadrato .ui__nav span.active { background: rgba(74,222,128,0.12); color: var(--lime); }
+.ui--cuadrato .bigfig__num { color: var(--lime); }
+.ui--cuadrato .ui__rows .row i { background: var(--lime); }
+.ui__rows--cuadrato .row b { color: var(--lime); }
 
 /* ---- Dren IT styling ---- */
 .ui--it { background: #0a0a0e; }
@@ -824,7 +824,7 @@ img, svg { display: block; max-width: 100%; }
 
 /* per-case background tint */
 .case--tadr    .case__art::before { content:''; position:absolute; inset:-10% -5% -5% -5%; background: radial-gradient(ellipse at 50% 50%, rgba(45,212,191,0.07), transparent 60%); pointer-events: none; filter: blur(40px); z-index: -1; }
-.case--kubera  .case__art::before { content:''; position:absolute; inset:-10% -5% -5% -5%; background: radial-gradient(ellipse at 50% 50%, rgba(74,222,128,0.06), transparent 60%); pointer-events: none; filter: blur(40px); z-index: -1; }
+.case--cuadrato  .case__art::before { content:''; position:absolute; inset:-10% -5% -5% -5%; background: radial-gradient(ellipse at 50% 50%, rgba(74,222,128,0.06), transparent 60%); pointer-events: none; filter: blur(40px); z-index: -1; }
 .case--it      .case__art::before { content:''; position:absolute; inset:-10% -5% -5% -5%; background: radial-gradient(ellipse at 50% 50%, rgba(201,168,76,0.07), transparent 60%); pointer-events: none; filter: blur(40px); z-index: -1; }
 .case--jurisrd .case__art::before { content:''; position:absolute; inset:-10% -5% -5% -5%; background: radial-gradient(ellipse at 50% 50%, rgba(167,139,250,0.07), transparent 60%); pointer-events: none; filter: blur(40px); z-index: -1; }
 .case--ceba    .case__art::before { content:''; position:absolute; inset:-10% -5% -5% -5%; background: radial-gradient(ellipse at 50% 50%, rgba(103,232,249,0.06), transparent 60%); pointer-events: none; filter: blur(40px); z-index: -1; }

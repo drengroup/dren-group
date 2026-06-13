@@ -661,7 +661,7 @@ ul { list-style: none; }
 .case-card--zona::before   { background: radial-gradient(ellipse 80% 60% at 20% 30%, rgba(77,124,95,0.08) 0%, transparent 70%); }
 .case-card--tadr::before   { background: radial-gradient(ellipse 80% 60% at 80% 80%, rgba(201,168,76,0.09) 0%, transparent 70%); }
 .case-card--drenit::before { background: radial-gradient(ellipse 80% 60% at 50% 20%, rgba(99,179,237,0.07) 0%, transparent 70%); }
-.case-card--kubera::before { background: radial-gradient(ellipse 80% 60% at 20% 80%, rgba(167,139,250,0.07) 0%, transparent 70%); }
+.case-card--cuadrato::before { background: radial-gradient(ellipse 80% 60% at 20% 80%, rgba(167,139,250,0.07) 0%, transparent 70%); }
 
 .case-card__header {
   padding: 2rem;
@@ -724,7 +724,7 @@ ul { list-style: none; }
 .case-card--tadr:hover   .case-card__name { color: var(--gold-light); transition: color var(--duration-base); }
 .case-card--zona:hover   .case-card__name { color: #7ec49a; transition: color var(--duration-base); }
 .case-card--drenit:hover .case-card__name { color: #63b3ed; transition: color var(--duration-base); }
-.case-card--kubera:hover .case-card__name { color: #a78bfa; transition: color var(--duration-base); }
+.case-card--cuadrato:hover .case-card__name { color: #a78bfa; transition: color var(--duration-base); }
 
 .case-card__tagline {
   font-size: 0.85rem;
@@ -751,7 +751,7 @@ ul { list-style: none; }
 .case-card--tadr   .case-card__accent { background: linear-gradient(90deg, var(--gold-light), transparent); }
 .case-card--zona   .case-card__accent { background: linear-gradient(90deg, var(--sage), transparent); }
 .case-card--drenit .case-card__accent { background: linear-gradient(90deg, #63b3ed, transparent); }
-.case-card--kubera .case-card__accent { background: linear-gradient(90deg, #a78bfa, transparent); }
+.case-card--cuadrato .case-card__accent { background: linear-gradient(90deg, #a78bfa, transparent); }
 
 /* Expand toggle */
 .case-card__expand-icon {

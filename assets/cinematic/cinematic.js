@@ -194,7 +194,7 @@
       if (art) {
         gsap.from(art, {
           scrollTrigger: { trigger: el, start: 'top 70%' },
-          opacity: 0, x: el.classList.contains('case--kubera') || el.classList.contains('case--jurisrd') ? -40 : 40,
+          opacity: 0, x: el.classList.contains('case--cuadrato') || el.classList.contains('case--jurisrd') ? -40 : 40,
           duration: 1.0, ease: 'expo.out'
         });
       }
